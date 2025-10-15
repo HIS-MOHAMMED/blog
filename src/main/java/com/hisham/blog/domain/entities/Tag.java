@@ -4,6 +4,7 @@ package com.hisham.blog.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,5 +23,8 @@ public class Tag {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @ManyToMany(mappedBy = "tags")
+    private List<Post> posts = new ArrayList<>();
 
 }
