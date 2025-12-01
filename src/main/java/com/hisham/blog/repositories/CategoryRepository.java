@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("SELECT c from Category c LEFT JOIN FETCH c.posts")
     List<Category> findAllWithPostCount();
+    boolean existsByNameIgnoreCase(String category_name);
 }
