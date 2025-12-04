@@ -1,5 +1,6 @@
 package com.hisham.blog.controllers;
 import com.hisham.blog.domain.dtos.CategoryDto;
+import com.hisham.blog.domain.dtos.CreateCategoryRequest;
 import com.hisham.blog.domain.entities.Category;
 import com.hisham.blog.mappers.CategoryMapper;
 import com.hisham.blog.services.impl.CategoryServiceImpl;
@@ -13,7 +14,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import javax.sound.midi.MidiChannel;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -72,5 +77,27 @@ public class CategoryControllerTests {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].name").value("Science"))
                 .andExpect(jsonPath("$[1].postCount").value(1));
+    }
+    @Test
+    public void givenValidCreateRequest_whenCreateCategory_thenStatusCreated() throws Exception{
+        given(categoryMapper.toEntity(any(CreateCategoryRequest.class))).willReturn(category1);
+        given(categoryService.createCategory(any(Category.class))).willReturn(category1);
+        given(categoryMapper.toDto(any(Category.class))).willReturn(categoryDto1);
+
+
+        ResultActions resultActions = mockMvc.perform(post("/api/v1/categories")
+                .accept(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "name": "Science"
+                        }
+                        """)
+                .contentType(MediaType.APPLICATION_JSON));
+
+
+        resultActions.andExpect(MockMvcResultMatchers
+                .status().isCreated())
+                .andExpect(jsonPath("$.name").value("Science"));
+
     }
 }

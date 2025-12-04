@@ -52,4 +52,17 @@ public class CategoryServiceTests {
                 .containsExactly("Science","Medical");
         verify(categoryRepository,times(1)).findAllWithPostCount();
     }
+
+    @Test
+    public void givenCategory_whenCreateCategory_thenReturnSavedCategory(){
+        // Act
+        when(categoryRepository.existsByNameIgnoreCase(any(String.class))).thenReturn(false);
+        when(categoryRepository.save(any(Category.class))).thenReturn(category1);
+        Category savedCategory = categoryService.createCategory(category1);
+
+        // Assert
+        Assertions.assertThat(savedCategory).isNotNull();
+        Assertions.assertThat(savedCategory.getName()).isEqualTo("Science");
+        verify(categoryRepository, times(1)).existsByNameIgnoreCase(any(String.class));
+    }
 }
