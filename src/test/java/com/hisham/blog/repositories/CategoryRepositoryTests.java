@@ -57,4 +57,13 @@ public class CategoryRepositoryTests {
                 .extracting(c -> c.getPosts().size())
                 .containsExactlyInAnyOrder(3,3);
     }
+
+    @Test
+    public void givenExistingCategoryName_whenExistsByNameIgnoreCase_thenReturnTrue(){
+        categoryRepository.save(category1);
+
+        boolean isCategoryExists = categoryRepository.existsByNameIgnoreCase("Science");
+
+        Assertions.assertThat(isCategoryExists).isTrue();
+    }
 }
