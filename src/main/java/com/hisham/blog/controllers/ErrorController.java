@@ -2,6 +2,7 @@ package com.hisham.blog.controllers;
 
 
 import com.hisham.blog.domain.dtos.ApiErrorResponse;
+import com.hisham.blog.exceptions.CategoryNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +34,15 @@ public class ErrorController {
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCategoryNotFoundException(CategoryNotFoundException ex){
+        log.error("Caught Exception", ex);
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message("Category not found!")
+                .build();
+        return new ResponseEntity<>(error,HttpStatus.NOT_FOUND);
     }
 }
