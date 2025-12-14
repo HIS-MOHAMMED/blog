@@ -2,8 +2,11 @@ package com.hisham.blog.controllers;
 import com.hisham.blog.domain.dtos.CategoryDto;
 import com.hisham.blog.domain.dtos.CreateCategoryRequest;
 import com.hisham.blog.domain.entities.Category;
+import com.hisham.blog.domain.entities.Post;
+import com.hisham.blog.exceptions.CategoryNotFoundException;
 import com.hisham.blog.mappers.CategoryMapper;
 import com.hisham.blog.services.impl.CategoryServiceImpl;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +20,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.sound.midi.MidiChannel;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @WebMvcTest(CategoryController.class)
 @AutoConfigureMockMvc
@@ -99,5 +105,47 @@ public class CategoryControllerTests {
                 .status().isCreated())
                 .andExpect(jsonPath("$.name").value("Science"));
 
+    }
+
+    @Test
+    public void givenValidId_whenDeleteCategory_thenReturnNoContent() throws Exception{
+        //given
+        UUID id = UUID.randomUUID();
+        willDoNothing().given(categoryService).deleteCategory(id);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/categories/{id}", id)
+                .accept(MediaType.APPLICATION_JSON));
+        //then
+        resultActions.andExpect(status().isNoContent());
+        verify(categoryService).deleteCategory(id);
+    }
+    @Test
+    public void givenCategoryWithPosts_whenDeleteCategory_thenReturnBadRequest() throws Exception{
+        //given
+        UUID id = UUID.randomUUID();
+
+        willThrow(new IllegalArgumentException("Category has posts associated with it"))
+                .given(categoryService).deleteCategory(id);
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/categories/{id}",id));
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+        verify(categoryService).deleteCategory(id);
+    }
+    @Test
+    public void givenNonExistingCategory_whenDeleteCategory_thenReturnNotFound() throws Exception{
+        //given
+        UUID id = UUID.randomUUID();
+        willThrow(new CategoryNotFoundException("Category not found!"))
+                .given(categoryService).deleteCategory(id);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(delete("/api/v1/categories/{id}",id));
+
+        //then
+        resultActions.andExpect(status().isNotFound());
+        verify(categoryService).deleteCategory(id);
     }
 }
