@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/api/v1/auth")
+@RequestMapping(path = "/api/v1/auth/login")
 public class AuthController {
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
     
     @PostMapping
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest){
